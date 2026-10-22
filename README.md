@@ -15,7 +15,10 @@ npm run preview
 # http://127.0.0.1:4175
 npx playwright install chromium
 npm run test:e2e
+npm run test:pages # kiểm tra lại qua local Pages, gồm CSP và 404
 ```
+
+Local Pages dùng Wrangler đã pin trong devDependencies; không cần đăng nhập Cloudflare và không deploy. Có thể chạy riêng bằng `npm run preview:pages`.
 
 Máy có Chrome sẵn: CHROME_PATH=/usr/bin/google-chrome npm run test:e2e.
 

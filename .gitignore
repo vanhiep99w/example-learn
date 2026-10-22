@@ -6,3 +6,5 @@ playwright-report/
 .env*
 !.env.example
 .DS_Store
+
+.wrangler/
