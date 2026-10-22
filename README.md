@@ -4,7 +4,7 @@ Repo tập trung các app minh họa chạy thật cho bộ tài liệu kỹ thu
 
 ## Chạy và kiểm tra
 
-Yêu cầu Node >=22.12 (khuyến nghị Node 22 LTS theo .nvmrc).
+Yêu cầu Node >=22.18 (khuyến nghị Node 22 LTS theo .nvmrc).
 
 ```bash
 npm ci
@@ -46,7 +46,7 @@ Lab React/Vue build chung để tập trung vào giao tiếp qua contract, **kh�
 3. Framework preset: **None**; root directory: root repo.
 4. Build command: **npm run build**.
 5. Build output directory: **dist**.
-6. Chọn Node 22.12+ trong build environment; có thể đặt NODE_VERSION=22. Build phải cài devDependencies (Vite và compiler ở devDependencies); không đặt NODE_ENV=production cho bước install.
+6. Chọn Node 22.18+ trong build environment; có thể đặt NODE_VERSION=22. Build phải cài devDependencies (Vite và compiler ở devDependencies); không đặt NODE_ENV=production cho bước install.
 7. Tạo project tên example-learn nếu khả dụng, deploy, rồi xác nhận domain được cấp. Git integration tự rebuild khi push main.
 
 File wrangler.jsonc đã khai báo output. Nếu dùng CLI thay vì Git integration:
