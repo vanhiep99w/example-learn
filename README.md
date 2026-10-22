@@ -43,6 +43,8 @@ Lab dùng shop giả định **Nếp**: ảnh sản phẩm được lưu local, 
 
 Mục **Xem luồng giao tiếp** mặc định đóng, chứa listener count, log, nút ẩn/mount và mô phỏng lỗi. Người đọc có thể dùng shop trước rồi mới mở phần giải thích; trên mobile dùng link **Giỏ hàng** ở header hoặc **Xem giỏ hàng** sau khi thêm. Không có nút checkout giả hoặc request thanh toán.
 
+Cùng URL v1 có biến thể thực hành `?mode=events-only`: header và Cart Vue **cố ý bỏ bước đọc snapshot khi mount**. Dấu — là chưa biết giỏ, không phải giỏ rỗng. Thêm hàng để nhận event, ẩn consumer, thêm tiếp rồi mount lại: consumer không biết snapshot mới cho tới event tiếp theo. Bản mặc định vẫn đọc snapshot + subscribe đúng. Hai lựa chọn là hai hành vi thật trong cùng lab, không phải tuyên bố hai release deploy độc lập. Example Explorer ở docs dùng chúng để thử dropdown phiên bản.
+
 Ảnh và nguồn license: `examples/micro-frontend/communication/v1/src/assets/README.md`. Ảnh được Vite build với base path của demo; không gọi CDN ảnh khi người đọc mở app.
 
 ## Deploy Cloudflare Pages qua GitHub

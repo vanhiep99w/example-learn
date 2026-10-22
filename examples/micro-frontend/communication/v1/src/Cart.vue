@@ -2,14 +2,14 @@
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import type { CartPort, ProductId, Snapshot } from './domain';
 import { money, productById } from './products';
-const props = defineProps<{ cart: CartPort }>();
+const props = defineProps<{ cart: CartPort; eventsOnly?: boolean }>();
 const snapshot = shallowRef<Snapshot>();
 const pending = ref(false);
 const feedback = ref('');
 let unsubscribe: (() => void) | undefined;
 onMounted(() => {
   unsubscribe = props.cart.subscribe(() => { snapshot.value = props.cart.getSnapshot(); });
-  snapshot.value = props.cart.getSnapshot();
+  if (!props.eventsOnly) snapshot.value = props.cart.getSnapshot();
 });
 onUnmounted(() => unsubscribe?.());
 const count = computed(() => snapshot.value?.itemCount ?? 0);
@@ -34,8 +34,8 @@ async function changeQuantity(productId: ProductId, quantity: number) {
       <h2 id="cart-title">Giỏ hàng của bạn</h2>
       <span class="framework-label">Cart · Vue</span>
     </div>
-    <div class="cart-meta"><p><strong data-testid="vue-count">{{ count }}</strong> sản phẩm</p><span class="sync-state"><span aria-hidden="true"></span>Cùng dữ liệu với header</span></div>
-    <template v-if="count > 0">
+    <div class="cart-meta"><p><strong data-testid="vue-count">{{ snapshot ? count : '—' }}</strong> sản phẩm</p><span class="sync-state"><span aria-hidden="true"></span>Cùng dữ liệu với header</span></div>
+    <template v-if="snapshot && count > 0">
       <ul class="cart-lines">
         <li v-for="line in snapshot?.lines" :key="line.productId" :data-cart-product="line.productId">
           <img :src="productById(line.productId).image" :alt="productById(line.productId).alt" width="64" height="76" />
@@ -58,6 +58,10 @@ async function changeQuantity(productId: ProductId, quantity: number) {
       <p class="cart-disclaimer">Giá minh họa. Demo không có đặt hàng hoặc thanh toán thật.</p>
       <a class="continue-shopping" href="#catalog">Tiếp tục chọn đồ <span aria-hidden="true">↗</span></a>
     </template>
+    <div v-else-if="!snapshot" class="empty-cart">
+      <h3>Chưa đọc snapshot</h3>
+      <p>Bản lỗi này chỉ chờ event mới. Giỏ đã có dữ liệu, nhưng consumer chưa biết. Thử thêm một sản phẩm.</p>
+    </div>
     <div v-else class="empty-cart">
       <svg width="36" height="40" viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M4 8h16l1 17H3L4 8Z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
       <h3>Giỏ đang trống</h3>

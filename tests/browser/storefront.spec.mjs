@@ -79,3 +79,27 @@ test('docs-sized iframe shows the cart next to products instead of pushing it be
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test('event-only teaching version reproduces missed initial snapshots without pretending unknown means zero', async ({page}) => {
+  await page.goto(demo+'?mode=events-only');
+  await expect(page.getByTestId('header-count')).toHaveText('—');
+  await expect(page.getByTestId('vue-count')).toHaveText('—');
+  await expect(page.getByRole('heading',{name:'Chưa đọc snapshot',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Thêm cốc',exact:true}).click();
+  await expect(page.getByTestId('vue-count')).toHaveText('3');
+  await expect(page.getByTestId('header-count')).toHaveText('3');
+  await page.locator('.inspector > summary').click();
+  await page.getByRole('button',{name:'Ẩn Header',exact:true}).click();
+  await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
+  await page.getByRole('button',{name:'Thêm cốc',exact:true}).click();
+  await expect(page.locator('.catalog-feedback')).toContainText('Đã thêm 1 cốc');
+  await page.getByRole('button',{name:'Mount Header',exact:true}).click();
+  await page.getByRole('button',{name:'Mount Cart Vue',exact:true}).click();
+  await expect(page.getByTestId('header-count')).toHaveText('—');
+  await expect(page.getByTestId('vue-count')).toHaveText('—');
+  await page.getByRole('button',{name:'Thêm áo',exact:true}).click();
+  await expect(page.getByTestId('vue-count')).toHaveText('5');
+  await expect(page.getByTestId('header-count')).toHaveText('5');
+  await page.goto(demo);
+  await expect(page.getByTestId('vue-count')).toHaveText('2');
+});

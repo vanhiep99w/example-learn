@@ -4,7 +4,10 @@ import { createApp } from 'vue';
 import { Catalog } from './Catalog';
 import Cart from './Cart.vue';
 import { createCartOwner, type Trace } from './domain';
+import { readDemoMode } from './modes';
 import './style.css';
+
+const eventsOnly = readDemoMode(window.location.search) === 'events-only';
 
 const bagIcon = '<svg width="20" height="22" viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 8h16l1 17H3L4 8Z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -20,7 +23,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </header>
   <main>
     <div class="shop-intro"><div><p class="eyebrow">ÍT MÓN HƠN, DỄ CHỌN HƠN</p><h1>Một chút cho mỗi ngày.</h1></div><p>Hai món đồ quen thuộc.<br>Chọn món bạn thích, thử thêm vào giỏ.</p></div>
-    <aside class="lesson-note" aria-label="Bài tập tương tác"><span class="lesson-label">THỬ NGAY</span><p>Giỏ đã có <strong>2 chiếc áo</strong>. Thêm <strong>1 chiếc cốc</strong> và nhìn số trên header cùng giỏ hàng đổi thành <strong>3</strong>.</p></aside>
+    <aside class="lesson-note" aria-label="Bài tập tương tác"><span class="lesson-label">${eventsOnly ? 'BẢN LỖI' : 'THỬ NGAY'}</span><p>${eventsOnly ? 'Chỉ nghe event, không đọc snapshot khi mount. Dấu <strong>—</strong> là chưa biết giỏ hiện tại, không phải giỏ rỗng. Thêm hàng rồi ẩn/mount consumer để thấy lỗi.' : 'Giỏ đã có <strong>2 chiếc áo</strong>. Thêm <strong>1 chiếc cốc</strong> và nhìn số trên header cùng giỏ hàng đổi thành <strong>3</strong>.'}</p></aside>
     <div class="shop-layout"><div id="catalog"></div><div id="cart"></div></div>
     <details class="inspector">
       <summary><span class="inspector-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5M14 4l-4 16"/></svg>Xem luồng giao tiếp</span><span class="inspector-caption">React · Cart owner · Vue</span><span class="disclosure-icon" aria-hidden="true">+</span></summary>
@@ -69,13 +72,17 @@ function mountHeader() {
   headerCart.hidden = false;
   headerPaused.hidden = true;
   headerOff = owner.port.subscribe(render);
-  render();
+  if (eventsOnly) {
+    badge.textContent = '—';
+    badge.dataset.testid = 'header-count';
+    delete badge.dataset.revision;
+  } else render();
 }
 mountHeader();
 
 let cartApp: ReturnType<typeof createApp> | undefined;
 function mountCart() {
-  cartApp = createApp(Cart, { cart: owner.port });
+  cartApp = createApp(Cart, { cart: owner.port, eventsOnly });
   cartApp.mount('#cart');
 }
 mountCart();
