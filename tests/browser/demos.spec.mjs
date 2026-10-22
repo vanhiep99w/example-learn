@@ -1,0 +1,66 @@
+import { test, expect } from '@playwright/test';
+const demo = '/micro-frontend/communication/v1/';
+test('React and Vue share owner state across lifecycle, rejection and duplicate events', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(demo);
+  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 2 · revision 0');
+  await expect(page.getByTestId('vue-count')).toHaveText('2');
+  await expect(page.locator('#listener-count')).toHaveText('2');
+  await page.getByRole('button', {name:'Thêm cốc',exact:true}).click();
+  await expect(page.getByTestId('vue-count')).toHaveText('3');
+  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 3 · revision 1');
+  await page.getByRole('button',{name:'Phát lại event cuối'}).click();
+  await expect(page.getByTestId('vue-count')).toHaveText('3');
+  await expect(page.locator('#trace')).toContainText('Bỏ event lặp/cũ');
+  await page.getByRole('button',{name:'Gửi event sai schema'}).click();
+  await expect(page.locator('#trace')).toContainText('Event sai schema');
+  await page.getByRole('button',{name:'Ẩn Header',exact:true}).click();
+  await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
+  await expect(page.locator('#listener-count')).toHaveText('0');
+  await page.getByRole('button',{name:'Thêm cốc',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Command thành công');
+  await page.getByRole('button',{name:'Mount Header',exact:true}).click();
+  await page.getByRole('button',{name:'Mount Cart Vue',exact:true}).click();
+  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 4 · revision 2');
+  await expect(page.getByTestId('vue-count')).toHaveText('4');
+  for(let i=0;i<3;i++) {
+    await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
+    await page.getByRole('button',{name:'Mount Cart Vue',exact:true}).click();
+  }
+  await expect(page.locator('#listener-count')).toHaveText('2');
+  await page.getByRole('button',{name:'Từ chối lần thêm tiếp theo'}).click();
+  await page.getByRole('button',{name:'Thêm áo',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('API giả lập từ chối');
+  await expect(page.getByTestId('vue-count')).toHaveText('4');
+  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 4 · revision 2');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+test('direct URL/reload, catalog, missing assets and dark mode', async ({page,request}) => {
+  await page.goto('/');
+  await expect(page.getByRole('link',{name:'Giao tiếp và state: React + Vue',exact:true})).toHaveAttribute('href',demo);
+  await page.goto(demo);
+  await page.reload();
+  await expect(page.getByTestId('vue-count')).toHaveText('2');
+  await page.emulateMedia({colorScheme:'dark'});
+  await expect(page.locator('body')).toHaveCSS('background-color','rgb(23, 27, 33)');
+  const missing = await request.get(demo + 'missing.js');
+  expect(missing.status()).toBe(404);
+  const registry = await (await request.get('/registry.json')).json();
+  expect(registry.map(entry => entry.path)).toContain(demo);
+});
+test('vanilla demo is independent and cleanup does not multiply deliveries', async ({page}) => {
+  await page.goto('/browser/event-target/v1/');
+  await page.getByRole('button',{name:'Phát event'}).click();
+  await expect(page.getByRole('status')).toHaveText('Chưa subscribe · đã nhận 0 event');
+  await page.getByRole('button',{name:'Subscribe',exact:true}).click();
+  await page.getByRole('button',{name:'Phát event'}).click();
+  await expect(page.getByRole('status')).toHaveText('Đang subscribe · đã nhận 1 event');
+  await page.getByRole('button',{name:'Unsubscribe',exact:true}).click();
+  await page.getByRole('button',{name:'Phát event'}).click();
+  await expect(page.getByRole('status')).toHaveText('Chưa subscribe · đã nhận 1 event');
+  await page.getByRole('button',{name:'Subscribe',exact:true}).click();
+  await page.getByRole('button',{name:'Phát event'}).click();
+  await expect(page.getByRole('status')).toHaveText('Đang subscribe · đã nhận 2 event');
+});

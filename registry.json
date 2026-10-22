@@ -1,0 +1,24 @@
+[
+  {
+    "id": "micro-frontend/communication",
+    "version": "v1",
+    "title": "Giao tiếp và state: React + Vue",
+    "description": "Catalog gửi command; cart owner giữ snapshot; header và Cart Vue nhận event. Thử unmount và event lặp.",
+    "frameworks": [
+      "React",
+      "Vue"
+    ],
+    "directory": "examples/micro-frontend/communication/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/giao-tiep-va-trang-thai"
+  },
+  {
+    "id": "browser/event-target",
+    "version": "v1",
+    "title": "EventTarget và cleanup",
+    "description": "Demo JavaScript thuần: subscribe, phát event và gỡ listener trước khi đăng ký lại.",
+    "frameworks": [
+      "Vanilla JavaScript"
+    ],
+    "directory": "examples/browser/event-target/v1"
+  }
+]
