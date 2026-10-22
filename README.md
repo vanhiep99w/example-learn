@@ -37,9 +37,17 @@ npm run dev --workspace @example-learn/mfe-communication-v1
 
 Lab React/Vue build chung để tập trung vào giao tiếp qua contract, **không phải Module Federation hoặc independent deployment**. API là mô phỏng bất đồng bộ trong memory; không có backend, database, auth hoặc persistence. Event schema trong lab được rút gọn cho các tình huống thực hành; không thay thế toàn bộ contract trong bài. Reload khởi tạo lại state.
 
+### Giao diện shop của lab React/Vue
+
+Lab dùng shop giả định **Nếp**: ảnh sản phẩm được lưu local, giá minh họa, số lượng riêng ở từng thẻ Catalog, badge header và giỏ Vue có tạm tính. Giỏ bắt đầu với hai áo; thêm một cốc thì tổng quantity ở hai consumer cùng thành ba. Tăng/giảm hoặc xóa trong giỏ gọi command `setQuantity` qua cùng cart owner, không sửa state trực tiếp trong Vue. Giá là fixture dùng để hiển thị, không phải giá được backend xác nhận.
+
+Mục **Xem luồng giao tiếp** mặc định đóng, chứa listener count, log, nút ẩn/mount và mô phỏng lỗi. Người đọc có thể dùng shop trước rồi mới mở phần giải thích; trên mobile dùng link **Giỏ hàng** ở header hoặc **Xem giỏ hàng** sau khi thêm. Không có nút checkout giả hoặc request thanh toán.
+
+Ảnh và nguồn license: `examples/micro-frontend/communication/v1/src/assets/README.md`. Ảnh được Vite build với base path của demo; không gọi CDN ảnh khi người đọc mở app.
+
 ## Deploy Cloudflare Pages qua GitHub
 
-**Chưa deploy hoặc kiểm chứng URL production trong lần triển khai source này.** Domain dự kiến là https://example-learn.pages.dev; chỉ dùng sau khi dashboard xác nhận project/domain đó thuộc tài khoản của bạn.
+Domain đang dùng: https://example-learn.pages.dev. Chủ repo đã deploy bản đầu và kiểm tra được demo/iframe production. Mỗi thay đổi source vẫn cần chờ Pages build/deploy; build local không chứng minh bản mới đã lên production.
 
 1. Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.
 2. Chọn repo vanhiep99w/example-learn, production branch main.

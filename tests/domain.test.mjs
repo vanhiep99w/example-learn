@@ -65,3 +65,33 @@ test('bad listeners are isolated from other listeners and mutation success', asy
   assert.equal(seen, 1);
   assert.equal(trace.filter(([kind]) => kind === 'ERROR').length, 2);
 });
+
+test('Vue quantity commands share the owner queue, notify once and support removing every line', async () => {
+  const owner = createCartOwner(undefined, 0);
+  let changes = 0;
+  owner.port.subscribe(() => changes++);
+  await Promise.all([
+    owner.port.addItem({productId:'mug',quantity:2}),
+    owner.port.setQuantity({productId:'shirt',quantity:3}),
+  ]);
+  assert.equal(owner.port.getSnapshot().itemCount, 5);
+  assert.equal(owner.port.getSnapshot().revision, 2);
+  assert.equal(changes, 2);
+  await owner.port.setQuantity({productId:'mug',quantity:0});
+  await owner.port.setQuantity({productId:'shirt',quantity:0});
+  assert.equal(owner.port.getSnapshot().itemCount, 0);
+  assert.deepEqual(owner.port.getSnapshot().lines, []);
+  assert.equal(changes, 4);
+  await owner.port.setQuantity({productId:'shirt',quantity:0}); // Idempotent no-op.
+  assert.equal(changes, 4);
+  assert.equal((await owner.port.setQuantity({productId:'shirt',quantity:-1})).ok, false);
+});
+test('rejected quantity changes preserve snapshot identity and later commands still succeed', async () => {
+  const owner = createCartOwner(undefined, 0);
+  const initial = owner.port.getSnapshot();
+  owner.rejectNext();
+  assert.equal((await owner.port.setQuantity({productId:'shirt',quantity:3})).ok, false);
+  assert.equal(owner.port.getSnapshot(), initial);
+  assert.equal((await owner.port.setQuantity({productId:'shirt',quantity:3})).ok, true);
+  assert.equal(owner.port.getSnapshot().itemCount, 3);
+});

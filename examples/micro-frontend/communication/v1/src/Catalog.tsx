@@ -1,34 +1,61 @@
 import { useState } from 'react';
 import type { CartPort, ProductId } from './domain';
+import { money, products, productById } from './products';
 
 export function Catalog({ cart }: { cart: CartPort }) {
-  const [quantity, setQuantity] = useState(1);
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState('Quantity là local state của Catalog, chưa phải dữ liệu giỏ.');
+  const [quantities, setQuantities] = useState<Record<ProductId, number>>({ mug: 1, shirt: 1 });
+  const [pending, setPending] = useState<ProductId | null>(null);
+  const [feedback, setFeedback] = useState({ text: '', error: false });
+  function adjust(id: ProductId, delta: number) {
+    setQuantities(previous => ({ ...previous, [id]: Math.max(1, Math.min(10, previous[id] + delta)) }));
+  }
   async function add(productId: ProductId) {
-    setPending(true);
-    setMessage('Đang chờ API giả lập xác nhận…');
+    const quantity = quantities[productId];
+    setPending(productId);
+    setFeedback({ text: 'Đang thêm vào giỏ…', error: false });
     try {
       const result = await cart.addItem({ productId, quantity });
-      setMessage(result.ok ? 'Command thành công. Catalog không sửa badge hoặc store của Cart.' : result.reason);
+      setFeedback({
+        text: result.ok ? `Đã thêm ${quantity} ${productById(productId).shortName.toLowerCase()} vào giỏ. Header và giỏ hàng đã cùng cập nhật.` : result.reason,
+        error: !result.ok,
+      });
     } catch {
-      setMessage('Command gặp lỗi ngoài dự kiến. Thử tải lại demo.');
+      setFeedback({ text: 'Chưa thể cập nhật giỏ. Bạn thử lại nhé.', error: true });
     } finally {
-      setPending(false);
+      setPending(null);
     }
   }
-  return <section aria-labelledby="catalog-title" className="domain">
-    <p className="eyebrow">REACT / COMMAND CONSUMER</p>
-    <h2 id="catalog-title">Catalog</h2>
-    <label className="quantity">Số lượng mỗi lần thêm
-      <select aria-label="Số lượng" value={quantity} onChange={event => setQuantity(Number(event.target.value))}>
-        {[1, 2, 3].map(value => <option key={value} value={value}>{value}</option>)}
-      </select>
-    </label>
+  return <section aria-labelledby="catalog-title" className="catalog">
+    <div className="section-heading">
+      <div><span className="eyebrow">BỘ SƯU TẬP NHỎ</span><h2 id="catalog-title">Đồ dùng mỗi ngày</h2></div>
+      <span className="framework-label">Catalog · React</span>
+    </div>
     <ul className="products">
-      <li><div><strong>Cốc</strong><span>productId: mug</span></div><button disabled={pending} onClick={() => void add('mug')}>Thêm cốc</button></li>
-      <li><div><strong>Áo</strong><span>productId: shirt</span></div><button disabled={pending} onClick={() => void add('shirt')}>Thêm áo</button></li>
+      {products.map(product => <li key={product.id} className="product" data-product={product.id}>
+        <div className="product-photo">
+          <img src={product.image} alt={product.alt} width={product.id === 'mug' ? 960 : 720} height={product.id === 'mug' ? 640 : 800} fetchPriority="high" />
+          <span className="photo-index">{product.id === 'mug' ? '01' : '02'}</span>
+        </div>
+        <div className="product-info">
+          <h3>{product.name}</h3>
+          <p className="product-detail">{product.detail}</p>
+          <p className="product-price">{money(product.price)}</p>
+          <div className="product-actions">
+            <div className="quantity-stepper" role="group" aria-label={`Số lượng ${product.shortName}`}>
+              <button type="button" aria-label={`Giảm số lượng ${product.shortName}`} disabled={quantities[product.id] === 1 || pending !== null} onClick={() => adjust(product.id, -1)}>−</button>
+              <output aria-label={`Số lượng chọn ${product.shortName}`}>{quantities[product.id]}</output>
+              <button type="button" aria-label={`Tăng số lượng ${product.shortName}`} disabled={quantities[product.id] === 10 || pending !== null} onClick={() => adjust(product.id, 1)}>+</button>
+            </div>
+            <button className="add-button" type="button" disabled={pending !== null} aria-label={`Thêm ${product.shortName.toLowerCase()}`} onClick={() => void add(product.id)}>
+              {pending === product.id ? 'Đang thêm…' : 'Thêm vào giỏ'}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+          </div>
+        </div>
+      </li>)}
     </ul>
-    <p className="hint" role="status">{message}</p>
+    <div className="catalog-feedback" data-error={feedback.error || undefined} role="status" aria-atomic="true">
+      {feedback.text && <><span className="feedback-mark" aria-hidden="true">{feedback.error ? '!' : pending ? '…' : '✓'}</span><span>{feedback.text} {!feedback.error && !pending && <a href="#cart">Xem giỏ hàng</a>}</span></>}
+    </div>
   </section>;
 }

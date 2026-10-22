@@ -12,6 +12,7 @@ export type Trace = (kind: string, message: string) => void;
 export type AddResult = Readonly<{ ok: true } | { ok: false; reason: string }>;
 export type CartPort = Readonly<{
   addItem(input: { productId: ProductId; quantity: number }): Promise<AddResult>;
+  setQuantity(input: { productId: ProductId; quantity: number }): Promise<AddResult>;
   getSnapshot(): Snapshot;
   subscribe(handler: () => void): () => void;
 }>;
@@ -83,6 +84,27 @@ export function createCartOwner(trace: Trace = () => {}, delayMs = 350) {
       payload: { cartId: snapshot.cartId, revision: snapshot.revision, itemCount: snapshot.itemCount },
     });
   };
+  // All writers use the same queue, including quantity changes from the Vue cart.
+  const schedule = (change: () => readonly Line[]): Promise<AddResult> => {
+    const rejected = rejectNext;
+    rejectNext = false;
+    const result = queue.then(async (): Promise<AddResult> => {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      if (rejected) {
+        trace('REJECT', 'API giả lập từ chối command: không commit, không phát cart.updated.');
+        return { ok: false, reason: 'API giả lập từ chối. Giỏ chưa thay đổi.' };
+      }
+      const lines = change();
+      if (!Number.isSafeInteger(lines.reduce((total, line) => total + line.quantity, 0))) {
+        return { ok: false, reason: 'Số lượng vượt giới hạn của demo.' };
+      }
+      if (lines !== snapshot.lines) commit(lines);
+      return { ok: true };
+    });
+    // An unexpected failure must not poison every later command in the queue.
+    queue = result.catch(() => undefined);
+    return result;
+  };
   const port: CartPort = Object.freeze({
     getSnapshot() {
       trace('QUERY', `Đọc snapshot revision ${snapshot.revision} · ${snapshot.itemCount} sản phẩm`);
@@ -95,23 +117,27 @@ export function createCartOwner(trace: Trace = () => {}, delayMs = 350) {
       if (!['shirt', 'mug'].includes(productId) || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 10) {
         return Promise.resolve({ ok: false, reason: 'Sản phẩm hoặc số lượng không hợp lệ.' } as const);
       }
-      const rejected = rejectNext;
-      rejectNext = false;
-      const result = queue.then(async (): Promise<AddResult> => {
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-        if (rejected) {
-          trace('REJECT', 'API giả lập từ chối command: không commit, không phát cart.updated.');
-          return { ok: false, reason: 'API giả lập từ chối. Giỏ chưa thay đổi.' };
-        }
+      return schedule(() => {
         const existing = snapshot.lines.find(line => line.productId === productId);
-        const lines = existing
+        return existing
           ? snapshot.lines.map(line => line.productId === productId ? { ...line, quantity: line.quantity + quantity } : line)
           : [...snapshot.lines, { productId, name: productId === 'mug' ? 'Cốc' : 'Áo', quantity }];
-        commit(lines);
-        return { ok: true };
       });
-      queue = result;
-      return result;
+    },
+    setQuantity(input: { productId: ProductId; quantity: number }) {
+      const { productId, quantity } = input;
+      trace('COMMAND', `cart → setQuantity(${productId}, ${quantity})`);
+      if (!['shirt', 'mug'].includes(productId) || !Number.isSafeInteger(quantity) || quantity < 0) {
+        return Promise.resolve({ ok: false, reason: 'Số lượng không hợp lệ.' } as const);
+      }
+      return schedule(() => {
+        const existing = snapshot.lines.find(line => line.productId === productId);
+        // Removing a missing item is a successful no-op; this port never creates a new line.
+        if (!existing || existing.quantity === quantity) return snapshot.lines;
+        return quantity === 0
+          ? snapshot.lines.filter(line => line.productId !== productId)
+          : snapshot.lines.map(line => line.productId === productId ? { ...line, quantity } : line);
+      });
     },
     subscribe(handler: () => void) {
       // A subscription is not replay. Consumers subscribe, then read the current snapshot.

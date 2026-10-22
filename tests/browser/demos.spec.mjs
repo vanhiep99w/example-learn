@@ -4,12 +4,15 @@ test('React and Vue share owner state across lifecycle, rejection and duplicate 
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(demo);
-  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 2 · revision 0');
+  await expect(page.getByTestId('header-count')).toHaveText('2');
   await expect(page.getByTestId('vue-count')).toHaveText('2');
+  await expect(page.locator('.inspector')).not.toHaveAttribute('open');
+  await page.locator('.inspector > summary').click();
   await expect(page.locator('#listener-count')).toHaveText('2');
   await page.getByRole('button', {name:'Thêm cốc',exact:true}).click();
   await expect(page.getByTestId('vue-count')).toHaveText('3');
-  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 3 · revision 1');
+  await expect(page.getByTestId('header-count')).toHaveText('3');
+  await expect(page.getByTestId('header-count')).toHaveAttribute('data-revision', '1');
   await page.getByRole('button',{name:'Phát lại event cuối'}).click();
   await expect(page.getByTestId('vue-count')).toHaveText('3');
   await expect(page.locator('#trace')).toContainText('Bỏ event lặp/cũ');
@@ -19,10 +22,10 @@ test('React and Vue share owner state across lifecycle, rejection and duplicate 
   await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
   await expect(page.locator('#listener-count')).toHaveText('0');
   await page.getByRole('button',{name:'Thêm cốc',exact:true}).click();
-  await expect(page.getByRole('status')).toContainText('Command thành công');
+  await expect(page.locator('.catalog-feedback')).toContainText('Đã thêm 1 cốc vào giỏ');
   await page.getByRole('button',{name:'Mount Header',exact:true}).click();
   await page.getByRole('button',{name:'Mount Cart Vue',exact:true}).click();
-  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 4 · revision 2');
+  await expect(page.getByTestId('header-count')).toHaveText('4');
   await expect(page.getByTestId('vue-count')).toHaveText('4');
   for(let i=0;i<3;i++) {
     await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
@@ -31,9 +34,9 @@ test('React and Vue share owner state across lifecycle, rejection and duplicate 
   await expect(page.locator('#listener-count')).toHaveText('2');
   await page.getByRole('button',{name:'Từ chối lần thêm tiếp theo'}).click();
   await page.getByRole('button',{name:'Thêm áo',exact:true}).click();
-  await expect(page.getByRole('status')).toContainText('API giả lập từ chối');
+  await expect(page.locator('.catalog-feedback')).toContainText('API giả lập từ chối');
   await expect(page.getByTestId('vue-count')).toHaveText('4');
-  await expect(page.getByTestId('header-count')).toHaveText('Giỏ: 4 · revision 2');
+  await expect(page.getByTestId('header-count')).toHaveText('4');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(errors).toEqual([]);
 });
