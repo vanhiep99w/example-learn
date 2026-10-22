@@ -25,10 +25,10 @@ export function Catalog({ cart }: { cart: CartPort }) {
       setPending(null);
     }
   }
-  return <section aria-labelledby="catalog-title" className="catalog">
+  return <section aria-labelledby="catalog-title" className="catalog module-region" data-module="catalog">
     <div className="section-heading">
       <div><span className="eyebrow">BỘ SƯU TẬP NHỎ</span><h2 id="catalog-title">Đồ dùng mỗi ngày</h2></div>
-      <span className="framework-label">Catalog · React</span>
+      <span className="framework-label module-tag">Catalog · React</span>
     </div>
     <ul className="products">
       {products.map(product => <li key={product.id} className="product" data-product={product.id}>

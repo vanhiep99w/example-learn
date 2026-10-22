@@ -29,10 +29,10 @@ async function changeQuantity(productId: ProductId, quantity: number) {
 </script>
 
 <template>
-  <section class="cart-panel" aria-labelledby="cart-title" :aria-busy="pending">
+  <section class="cart-panel module-region" data-module="cart" aria-labelledby="cart-title" :aria-busy="pending">
     <div class="section-heading">
       <h2 id="cart-title">Giỏ hàng của bạn</h2>
-      <span class="framework-label">Cart · Vue</span>
+      <span class="framework-label module-tag">Cart · Vue</span>
     </div>
     <div class="cart-meta"><p><strong data-testid="vue-count">{{ snapshot ? count : '—' }}</strong> sản phẩm</p><span class="sync-state"><span aria-hidden="true"></span>Cùng dữ liệu với header</span></div>
     <template v-if="snapshot && count > 0">

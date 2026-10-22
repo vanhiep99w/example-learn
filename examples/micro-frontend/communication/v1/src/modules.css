@@ -1,0 +1,90 @@
+/* Learning overlays: real DOM/module boundaries, not extra application panels. */
+[data-module="shell"] {
+  --module-ink: #865218;
+  --module-border: #bd8c4c;
+  --module-surface: #faf3e8;
+  --module-tag: #f4e5ce;
+}
+[data-module="catalog"] {
+  --module-ink: #28579c;
+  --module-border: #7197ce;
+  --module-surface: #f4f7fc;
+  --module-tag: #e6eefb;
+}
+[data-module="cart"] {
+  --module-ink: #29654c;
+  --module-border: #67a88a;
+  --module-surface: #f0f7f2;
+  --module-tag: #dfeee4;
+}
+@media (prefers-color-scheme: dark) {
+  [data-module="shell"] {
+    --module-ink: #e9c58b;
+    --module-border: #ad844b;
+    --module-surface: #29251f;
+    --module-tag: #3b3021;
+  }
+  [data-module="catalog"] {
+    --module-ink: #abc9f7;
+    --module-border: #6c94c7;
+    --module-surface: #1d2634;
+    --module-tag: #283a54;
+  }
+  [data-module="cart"] {
+    --module-ink: #a8d7bb;
+    --module-border: #629e7e;
+    --module-surface: #1e2b24;
+    --module-tag: #293d31;
+  }
+}
+.module-region {
+  outline: 1px solid var(--module-border);
+  background: var(--module-surface);
+}
+.store-header.module-region {
+  outline-offset: -1px;
+  border-bottom: 0;
+  border-radius: 6px;
+  padding-inline: 12px;
+}
+.catalog.module-region {
+  outline-offset: 9px;
+  border-radius: 3px;
+}
+.cart-panel.module-region,
+.cart-paused.module-region {
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.module-region .module-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-color: var(--module-border);
+  color: var(--module-ink);
+  background: var(--module-tag);
+  font-weight: 600;
+}
+.module-tag::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.module-region:focus-within {
+  outline-color: var(--module-ink);
+}
+@media (hover: hover) {
+  .module-region:hover { outline-color: var(--module-ink); }
+}
+@media (max-width: 420px) {
+  .store-header.module-region { gap: 10px; padding-inline: 10px; }
+  .store-header .module-tag { font-size: 9px; padding-inline: 5px; }
+  .store-header .header-cart { gap: 5px; font-size: 11px; }
+}
+@media (forced-colors: active) {
+  .module-region { outline-color: CanvasText; }
+  .module-region .module-tag { border-color: CanvasText; }
+}

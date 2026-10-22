@@ -103,3 +103,35 @@ test('event-only teaching version reproduces missed initial snapshots without pr
   await page.goto(demo);
   await expect(page.getByTestId('vue-count')).toHaveText('2');
 });
+
+test('module boundaries stay labeled and distinct in both themes and after Vue remount', async ({page}) => {
+  await page.goto(demo);
+  const labels = {shell:'Shell · JavaScript',catalog:'Catalog · React',cart:'Cart · Vue'};
+  for (const theme of ['light','dark']) {
+    await page.emulateMedia({colorScheme:theme});
+    const colors=[];
+    for (const [id,label] of Object.entries(labels)) {
+      const module=page.locator(`[data-module="${id}"]`);
+      await expect(module).toHaveCount(1);
+      await expect(module.locator('.module-tag')).toHaveText(label);
+      const style=await module.evaluate(element=>{
+        const css=getComputedStyle(element);
+        return {outline:css.outlineStyle,width:css.outlineWidth,bg:css.backgroundColor,color:css.outlineColor};
+      });
+      expect(style.outline).toBe('solid');
+      expect(style.width).toBe('1px');
+      expect(style.bg).not.toBe('rgba(0, 0, 0, 0)');
+      colors.push(style.color);
+    }
+    expect(new Set(colors).size).toBe(3);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+  await page.locator('.inspector > summary').click();
+  await page.getByRole('button',{name:'Ẩn Cart Vue',exact:true}).click();
+  await expect(page.locator('[data-module="cart"] .module-tag')).toHaveText('Cart · Vue · tạm ẩn');
+  await page.getByRole('button',{name:'Mount Cart Vue',exact:true}).click();
+  await expect(page.locator('[data-module="cart"] .module-tag')).toHaveText('Cart · Vue');
+  await page.getByRole('button',{name:'Thêm cốc',exact:true}).click();
+  await expect(page.getByTestId('header-count')).toHaveText('3');
+  await expect(page.getByTestId('vue-count')).toHaveText('3');
+});

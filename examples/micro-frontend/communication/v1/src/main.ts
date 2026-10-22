@@ -6,6 +6,7 @@ import Cart from './Cart.vue';
 import { createCartOwner, type Trace } from './domain';
 import { readDemoMode } from './modes';
 import './style.css';
+import './modules.css';
 
 const eventsOnly = readDemoMode(window.location.search) === 'events-only';
 
@@ -13,9 +14,9 @@ const bagIcon = '<svg width="20" height="22" viewBox="0 0 24 28" fill="none" str
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="demo-ribbon">Một cửa hàng mô phỏng để học micro-frontend. Không có thanh toán thật.</div>
 <div class="storefront">
-  <header class="store-header">
+  <header class="store-header module-region" data-module="shell" aria-label="Shell — khung ứng dụng JavaScript">
     <a class="wordmark" href="#catalog" aria-label="Nếp — về sản phẩm">nếp<span>.</span></a>
-    <span class="brand-caption">NHỮNG MÓN ĐỒ QUEN</span>
+    <span class="framework-label module-tag">Shell · JavaScript</span>
     <a id="header-cart" class="header-cart" href="#cart" aria-label="Xem giỏ hàng ở header">
       ${bagIcon}<span>Giỏ hàng</span><span id="badge" class="cart-badge" aria-live="polite" aria-atomic="true"></span>
     </a>
@@ -104,7 +105,7 @@ const cartButton = document.querySelector<HTMLButtonElement>('#toggle-cart')!;
 function toggleCart() {
   if (cartApp) {
     cartApp.unmount(); cartApp = undefined;
-    document.querySelector('#cart')!.innerHTML = `<section class="cart-paused"><span class="framework-label">Cart · Vue</span>${bagIcon}<h2>Giỏ đang tạm ẩn.</h2><p>Dữ liệu vẫn ở cart owner. Bạn cứ thêm hàng, rồi mở lại giỏ để thấy snapshot mới.</p><button type="button" id="restore-cart">Mở lại giỏ hàng</button></section>`;
+    document.querySelector('#cart')!.innerHTML = `<section class="cart-paused module-region" data-module="cart"><span class="framework-label module-tag">Cart · Vue · tạm ẩn</span>${bagIcon}<h2>Giỏ đang tạm ẩn.</h2><p>Dữ liệu vẫn ở cart owner. Bạn cứ thêm hàng, rồi mở lại giỏ để thấy snapshot mới.</p><button type="button" id="restore-cart">Mở lại giỏ hàng</button></section>`;
     document.querySelector<HTMLButtonElement>('#restore-cart')!.onclick = toggleCart;
   } else mountCart();
   cartButton.textContent = cartApp ? 'Ẩn Cart Vue' : 'Mount Cart Vue';
