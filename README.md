@@ -47,6 +47,26 @@ Cùng URL v1 có biến thể thực hành `?mode=events-only`: header và Cart 
 
 Ảnh và nguồn license: `examples/micro-frontend/communication/v1/src/assets/README.md`. Ảnh được Vite build với base path của demo; không gọi CDN ảnh khi người đọc mở app.
 
+## Các lab tương tác bổ sung
+
+Cả bảy lab dưới build độc lập, dùng chung CSS/helpers nhỏ ở `shared/`. Không phụ thuộc framework hoặc thư viện của site docs; không đưa các helpers này vào docs-kit. Ảnh minh họa tái sử dụng từ lab communication và license nguồn giữ tại đó.
+
+| URL dưới /micro-frontend/ | Hành vi thực tế | Giới hạn quan trọng |
+| --- | --- | --- |
+| css-isolation/v1/ | Stylesheet global, root namespace hoặc link CSS trong shadow root; bật/tắt CSS và quan sát nút Cart | Root namespace không phải CSS Modules/security sandbox |
+| routing/v1/ | Navigation port điều phối history, filter, chi tiết và Cart; mode=conflict cố ý bỏ notification khi remote pushState | Dùng query route để deep link trên static Pages, không test path rewrites hoặc React/Vue Router |
+| resilience/v1/ | React Error Boundary, dynamic import, fetch asset 404, deadline và một lần retry transient | Các fault còn lại là fixture; không có Federation remote hoặc backend |
+| query-cache/v1/ | TanStack Query Core thật, shared/separate QueryClient, observers, invalidation, cancel attempt cũ | API Promise memory; bộ đếm query function không phải HTTP request |
+| web-components/v1/ | Custom element, attributes, function capability, notification qua shadow boundary, ::part và connect/disconnect cleanup | Cùng JS realm; API giỏ memory, không phải iframe/Federation |
+| iframe-bridge/v1/ | Hai window thật, INIT/THEME/READY/RESIZE, reject sai source/session/schema | Parent/child cùng origin trong lab, không coi là cross-origin deployment đã kiểm chứng |
+| design-tokens/v1/ | React + Vue thật đọc CSS token scope; đổi theme/accent/density không remount; mode=drift override token Vue | Build chung; không phải phát hành UI package hay kiểm chứng compatibility |
+
+Dùng dropdown trong lab hoặc `Phiên bản` của Example Explorer để chọn biến thể. Các query mode được allowlist; không nhận URL/source tùy ý từ người đọc. Các biến thể là hành vi học tập của v1, không tự nhận là release v2. Nội dung từng bài docs nêu rõ thao tác và kết quả mong đợi.
+
+Iframe lab có `child.html` riêng, Vite build cả hai HTML entries. Toàn site giữ CSP không cho inline script/style; stylesheet trong shadow root được phục vụ bằng link CSS cùng origin. Không nới `unsafe-inline` để làm demo chạy.
+
+Kiểm thử: `tests/labs.test.mjs` bảo vệ navigation/protocol/deadline/query scope; `tests/browser/labs.spec.mjs` thử các tình huống và mobile/dark. Chạy thêm `npm run test:pages` để kiểm tra với CSP/404 của local Pages, không phải chứng nhận production đã deploy commit mới.
+
 ## Deploy Cloudflare Pages qua GitHub
 
 Domain đang dùng: https://example-learn.pages.dev. Chủ repo đã deploy bản đầu và kiểm tra được demo/iframe production. Mỗi thay đổi source vẫn cần chờ Pages build/deploy; build local không chứng minh bản mới đã lên production.

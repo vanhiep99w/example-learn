@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { loadRegistry, validateRegistry } from '../scripts/registry.mjs';
 test('registry has independently built React/Vue and vanilla demos', async () => {
   const registry = await loadRegistry();
-  assert.equal(registry.length, 2);
+  assert.equal(registry.length, 9);
   assert.deepEqual(registry[0].frameworks, ['React', 'Vue']);
   for (const entry of registry) assert(entry.directory.startsWith('examples/'));
 });

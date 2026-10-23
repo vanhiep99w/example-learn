@@ -1,0 +1,16 @@
+{
+  "name": "@example-learn/query-cache-v1",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "8.3.5"
+  },
+  "dependencies": {
+    "@tanstack/query-core": "5.104.5"
+  }
+}

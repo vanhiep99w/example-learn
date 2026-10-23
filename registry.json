@@ -20,5 +20,82 @@
       "Vanilla JavaScript"
     ],
     "directory": "examples/browser/event-target/v1"
+  },
+  {
+    "id": "micro-frontend/css-isolation",
+    "version": "v1",
+    "title": "CSS nào đang làm đổi nút?",
+    "description": "Bật CSS Catalog: so sánh selector global, root namespace và Shadow DOM; quan sát nút Cart có bị ảnh hưởng không.",
+    "frameworks": [
+      "Vanilla JavaScript"
+    ],
+    "directory": "examples/micro-frontend/css-isolation/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/ui-va-framework/css-isolation"
+  },
+  {
+    "id": "micro-frontend/routing",
+    "version": "v1",
+    "title": "Một URL, một nơi điều phối",
+    "description": "Một navigation port cho shell, chi tiết sản phẩm, filter và giỏ; đối chiếu bản URL đổi nhưng màn hình không cập nhật.",
+    "frameworks": [
+      "Vanilla JavaScript"
+    ],
+    "directory": "examples/micro-frontend/routing/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/giao-tiep-va-trang-thai/routing"
+  },
+  {
+    "id": "micro-frontend/resilience",
+    "version": "v1",
+    "title": "Catalog lỗi, shop còn dùng được không?",
+    "description": "Chủ động gây lỗi load, contract, React render hoặc deadline; giữ shell/cart hoạt động và giới hạn retry.",
+    "frameworks": [
+      "React"
+    ],
+    "directory": "examples/micro-frontend/resilience/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/production/resilience"
+  },
+  {
+    "id": "micro-frontend/query-cache",
+    "version": "v1",
+    "title": "Hai consumer, bao nhiêu request?",
+    "description": "TanStack Query Core với cùng/riêng QueryClient; điều khiển response memory để thử sharing, invalidation và cancel race.",
+    "frameworks": [
+      "TanStack Query Core"
+    ],
+    "directory": "examples/micro-frontend/query-cache/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/giao-tiep-va-trang-thai/data-fetching"
+  },
+  {
+    "id": "micro-frontend/web-components",
+    "version": "v1",
+    "title": "Một product card sau Shadow DOM",
+    "description": "Native custom element: attributes, capability, composed events, ::part và cleanup khi connect/disconnect.",
+    "frameworks": [
+      "Web Components"
+    ],
+    "directory": "examples/micro-frontend/web-components/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/cac-cach-tich-hop/web-components"
+  },
+  {
+    "id": "micro-frontend/iframe-bridge",
+    "version": "v1",
+    "title": "Hai window trao đổi dữ liệu thế nào?",
+    "description": "Hai window dùng INIT/THEME/READY/RESIZE; validate origin, source, session và schema với message thật.",
+    "frameworks": [
+      "postMessage"
+    ],
+    "directory": "examples/micro-frontend/iframe-bridge/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/cac-cach-tich-hop/iframe"
+  },
+  {
+    "id": "micro-frontend/design-tokens",
+    "version": "v1",
+    "title": "Đổi theme một lần cho React và Vue",
+    "description": "React và Vue cùng đọc token contract; thay theme, accent, density và đối chiếu consumer override token.",
+    "frameworks": [
+      "React + Vue"
+    ],
+    "directory": "examples/micro-frontend/design-tokens/v1",
+    "docsUrl": "https://micro-frontend-learn.pages.dev/docs/ui-va-framework/design-system"
   }
 ]
